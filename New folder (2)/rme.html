@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekam Medis Elektronik - Assist.id</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; background: #f4f6f8; color: #333; height: 100vh; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background-color: #1976d2;
+      color: white;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sidebar h2 {
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+    }
+    .nav-item {
+      padding: 0.8rem 1rem;
+      border-radius: 0.6rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+      width: 100%;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.2); }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.3rem; font-weight: 600; color: #1976d2; }
+
+    .patient-profile {
+      background: white;
+      margin: 1.5rem 2rem;
+      padding: 1.5rem;
+      border-radius: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .profile-left {
+      display: flex;
+      align-items: center;
+    }
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #90caf9, #1976d2);
+      margin-right: 1.2rem;
+    }
+    .patient-info h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.3rem;
+    }
+    .patient-info p { color: #666; }
+
+    .profile-actions button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .profile-actions button:hover { background: #125aa0; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      margin: 0 2rem;
+      border-bottom: 2px solid #ddd;
+    }
+    .tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: #666;
+    }
+    .tab.active {
+      color: #1976d2;
+      border-bottom: 3px solid #1976d2;
+    }
+
+    /* Timeline */
+    .timeline {
+      padding: 1.5rem 2rem;
+    }
+    .timeline-item {
+      background: white;
+      margin-bottom: 1rem;
+      border-radius: 0.8rem;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: #1976d2;
+      border-radius: 2px;
+    }
+    .timeline-content {
+      margin-left: 2rem;
+    }
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .timeline-header h3 {
+      font-size: 1.1rem;
+      color: #1976d2;
+    }
+    .timeline-header button {
+      background: #e3f2fd;
+      border: none;
+      color: #1976d2;
+      border-radius: 0.4rem;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .timeline-header button:hover { background: #bbdefb; }
+
+    .doctor-name {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* Riwayat Penyakit */
+    .record {
+      padding: 1.5rem 2rem;
+      display: none;
+    }
+    .record.active { display: block; }
+    .record-list {
+      background: white;
+      border-radius: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+    }
+    .record-list ul { list-style: none; }
+    .record-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .record-actions {
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .record-actions button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 0.8rem;
+      width: 400px;
+    }
+    .modal-content h3 {
+      margin-bottom: 1rem;
+      color: #1976d2;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+    .modal-buttons {
+      text-align: right;
+      margin-top: 1rem;
+    }
+    .modal-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+    .save-btn { background: #1976d2; color: white; }
+    .cancel-btn { background: #eee; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Hospital Diwali</h2>
+    <div class="nav-item">Dashboard</div>
+    <div class="nav-item">Pasien</div>
+    <div class="nav-item">Rekam Medis</div>
+  </div>
+
+  <div class="main">
+    <header>
+      <h1>Rekam Medis Elektronik</h1>
+      <div class="profile-actions">
+        <button id="addRecordBtn">+ Tambah Riwayat Penyakit</button>
+        <button>Print Rekam Medis</button>
+      </div>
+    </header>
+
+    <section class="patient-profile">
+      <div class="profile-left">
+        <div class="avatar"></div>
+        <div class="patient-info">
+          <h2 id="patientName">Budi Santoso</h2>
+          <p id="patientDetails">Laki-laki, 32 tahun</p>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button id="editPatientBtn">Edit Pasien</button>
+      </div>
+    </section>
+
+    <div class="tabs">
+      <div class="tab active" id="timelineTab">Timeline</div>
+      <div class="tab" id="recordTab">Riwayat Penyakit</div>
+    </div>
+
+    <section class="timeline" id="timelineSection">
+      <div class="timeline-item" data-index="0">
+        <div class="timeline-content">
+          <div class="timeline-header">
+            <h3>Kunjungan 1 - Pemeriksaan Umum</h3>
+            <button class="editDoctorBtn">Edit Dokter</button>
+          </div>
+          <p class="doctor-name">dr. Andi Wijaya</p>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-index="1">
+        <div class="timeline-content">
+          <div class="timeline-header">
+            <h3>Kunjungan 2 - Kontrol Lanjutan</h3>
+            <button class="editDoctorBtn">Edit Dokter</button>
+          </div>
+          <p class="doctor-name">dr. Siti Rahma</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="record" id="recordSection">
+      <div class="record-list">
+        <ul id="diseaseList">
+          <li>Hipertensi</li>
+          <li>Gastritis</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal Edit Pasien -->
+  <div class="modal" id="patientModal">
+    <div class="modal-content">
+      <h3>Edit Data Pasien</h3>
+      <label>Nama:</label>
+      <input type="text" id="patientNameInput" />
+      <label>Detail (jenis kelamin & umur):</label>
+      <input type="text" id="patientDetailsInput" />
+      <div class="modal-buttons">
+        <button class="cancel-btn" id="cancelPatientEdit">Batal</button>
+        <button class="save-btn" id="savePatientEdit">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Dokter -->
+  <div class="modal" id="doctorModal">
+    <div class="modal-content">
+      <h3>Edit Nama Dokter</h3>
+      <label>Nama Dokter:</label>
+      <input type="text" id="doctorNameInput" />
+      <div class="modal-buttons">
+        <button class="cancel-btn" id="cancelDoctorEdit">Batal</button>
+        <button class="save-btn" id="saveDoctorEdit">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Riwayat -->
+  <div class="modal" id="recordModal">
+    <div class="modal-content">
+      <h3>Tambah Riwayat Penyakit</h3>
+      <label>Nama Penyakit:</label>
+      <input type="text" id="diseaseInput" />
+      <div class="modal-buttons">
+        <button class="cancel-btn" id="cancelRecord">Batal</button>
+        <button class="save-btn" id="saveRecord">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const patientModal = document.getElementById('patientModal');
+    const doctorModal = document.getElementById('doctorModal');
+    const recordModal = document.getElementById('recordModal');
+
+    const patientName = document.getElementById('patientName');
+    const patientDetails = document.getElementById('patientDetails');
+
+    document.getElementById('editPatientBtn').onclick = () => {
+      document.getElementById('patientNameInput').value = patientName.textContent;
+      document.getElementById('patientDetailsInput').value = patientDetails.textContent;
+      patientModal.style.display = 'flex';
+    };
+    document.getElementById('cancelPatientEdit').onclick = () => patientModal.style.display = 'none';
+    document.getElementById('savePatientEdit').onclick = () => {
+      patientName.textContent = document.getElementById('patientNameInput').value;
+      patientDetails.textContent = document.getElementById('patientDetailsInput').value;
+      patientModal.style.display = 'none';
+    };
+
+    // Edit dokter
+    let currentDoctorElement = null;
+    document.querySelectorAll('.editDoctorBtn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        currentDoctorElement = e.target.closest('.timeline-content').querySelector('.doctor-name');
+        document.getElementById('doctorNameInput').value = currentDoctorElement.textContent;
+        doctorModal.style.display = 'flex';
+      });
+    });
+    document.getElementById('cancelDoctorEdit').onclick = () => doctorModal.style.display = 'none';
+    document.getElementById('saveDoctorEdit').onclick = () => {
+      currentDoctorElement.textContent = document.getElementById('doctorNameInput').value;
+      doctorModal.style.display = 'none';
+    };
+
+    // Tambah penyakit
+    document.getElementById('addRecordBtn').onclick = () => recordModal.style.display = 'flex';
+    document.getElementById('cancelRecord').onclick = () => recordModal.style.display = 'none';
+    document.getElementById('saveRecord').onclick = () => {
+      const val = document.getElementById('diseaseInput').value.trim();
+      if(val) {
+        const li = document.createElement('li');
+        li.textContent = val;
+        document.getElementById('diseaseList').appendChild(li);
+      }
+      document.getElementById('diseaseInput').value = '';
+      recordModal.style.display = 'none';
+    };
+
+    // Tab switch
+    document.getElementById('timelineTab').onclick = () => {
+      document.getElementById('timelineTab').classList.add('active');
+      document.getElementById('recordTab').classList.remove('active');
+      document.getElementById('timelineSection').style.display = 'block';
+      document.getElementById('recordSection').style.display = 'none';
+    };
+    document.getElementById('recordTab').onclick = () => {
+      document.getElementById('recordTab').classList.add('active');
+      document.getElementById('timelineTab').classList.remove('active');
+      document.getElementById('timelineSection').style.display = 'none';
+      document.getElementById('recordSection').style.display = 'block';
+    };
+
+    // Close modal when clicking outside
+    window.onclick = (e) => {
+      [patientModal, doctorModal, recordModal].forEach(m => {
+        if(e.target === m) m.style.display = 'none';
+      });
+    };
+  </script>
+</body>
+</html>
